@@ -269,7 +269,8 @@ theStudy=makeNewStudyFromFileNamelist('BIODEP', matfiles, studyArmDict)
 
 alphas = np.linspace(0.01, 0.5, 50)
 betas  = np.linspace(0.01, 0.5, 50)
-logLikelihoods = np.zeros((50,50))
+rewardWeights  = np.linspace(0.05, 2, 10)
+logLikelihoods = np.zeros((50,50,50))
 rewardWeight=1 #will be param
 
 
@@ -278,14 +279,18 @@ for ppt in theStudy.listPpts():
         #single out this session only
         thisSession=theStudy.ppts[ppt].sessions[sessionName]
         
-        for a, alpha in enumerate(alphas):
-            for b, beta in enumerate(betas):
-                proba, error = findProbabilityAndPredictionError(thisSession, alpha, beta, rewardWeight, 'gain', plot=False)
-                logLikelihoods[a,b] = np.sum(proba)
+        for r, rewardWeight in enumerate(rewardWeights):
+            for a, alpha in enumerate(alphas):
+                for b, beta in enumerate(betas):
+                    proba, error = findProbabilityAndPredictionError(thisSession, alpha, beta, rewardWeight, 'gain', plot=False)
+                    logLikelihoods[r,a,b] = np.sum(proba)
+
 
 
         plt.figure()
-        plt.imshow(-np.log(-logLikelihoods), extent=[np.min(alphas),np.max(alphas),np.min(betas), np.max(betas)],interpolation='None', xlabel='alpha', ylabel='beta')
+        plt.imshow(-np.log(-logLikelihoods[5,:,:]), extent=[np.min(alphas),np.max(alphas),np.min(betas), np.max(betas)],interpolation='None')
+        plt.xlabel('alpha')
+        plt.ylabel('beta')
         plt.colorbar()
         plt.show()
 
