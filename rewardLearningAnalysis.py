@@ -1,4 +1,4 @@
-from rewardLearning import *
+from rewardlearning import *
 
 ###################################################
 
