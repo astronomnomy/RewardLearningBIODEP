@@ -69,8 +69,8 @@ class Ppt:
             self.sessions.update({sessions.sessionName : sessions})
 
 
-def __setitem__(self, key, item):
-    self.sessions[key]=item
+    def __setitem__(self, key, item):
+        self.sessions[key]=item
     
     def __getitem__(self, key):
         return self.sessions[key]
@@ -83,12 +83,6 @@ def __setitem__(self, key, item):
         '''add a session to the ppt'''
         self.sessions.__setitem__(session.sessionName,session)
 
-
-
-
-#some method to pull out only the look loss gain trials
-
-#some method to average these over certain ppts
 
 
 # some class that defines a study?
@@ -108,8 +102,8 @@ class Study:
 
 
 
-def __setitem__(self, key, item):
-    '''add a new session'''
+    def __setitem__(self, key, item):
+        '''add a new session'''
         self.ppts[key]=item
     
     def __getitem__(self, key):
@@ -144,12 +138,16 @@ def __setitem__(self, key, item):
                 print "---GAIN: alpha: "+str(thisSession.alphas['gain']) \
                     +"\tbeta: "+str(thisSession.betas['gain']) \
                         +"\treward weighting: " +str(thisSession.rewardWeights['gain'])
+                #Sometimes multiple solutions will be outputted, this tags the result output explaining
+                if len(thisSession.alphas['gain']) > 1: print "MULTIPLE GAIN SOLUTIONS DETECTED"
                 print "---LOOK: alpha: "+str(thisSession.alphas['look']) \
                     +"\tbeta: "+str(thisSession.betas['look']) \
                         +"\treward weighting: "+str(thisSession.rewardWeights['look'])
+                if len(thisSession.alphas['look']) > 1: print "MULTIPLE LOOK SOLUTIONS DETECTED"
                 print "---LOSS: alpha: "+str(thisSession.alphas['loss']) \
                     +"\tbeta: "+str(thisSession.betas['loss']) \
                         +"\treward weighting: "+str(thisSession.rewardWeights['loss'])
+                if len(thisSession.alphas['loss']) > 1: print "MULTIPLE LOSS SOLUTIONS DETECTED"
                 print "-------------------------------------------------------"
                 print "-------------------------------------------------------"
 
@@ -169,15 +167,15 @@ def readReturnSession(filename):
                              matStruct['RESPONSEKEYS'][0],matStruct['seed'][0],matStruct['READYTIME'][0],
                              matStruct['ti'][0],matStruct['STIMULITIME'][0],matStruct['CHOICETIME'][0],
                              matStruct['FEEDBACKTIME'][0],matStruct['FIXATIONTIME'][0])
-        
-                             sessionName=filename.split('/')[-1].split('.')[0].split('_')[-1][4:]
+
+    sessionName=filename.split('/')[-1].split('.')[0].split('_')[-1][4:]
                              
-                             matStructData=matStruct['data']
+    matStructData=matStruct['data']
                              
-                             #NB, trial indexing starts at zero
-                             theseData=Session(sessionName,matStructData[:,1]-1,matStructData[:,2],matStructData[:,3],
-                                               matStructData[:,4],matStructData[:,5],matStructData[:,6],
-                                               matStructData[:,7],matStructData[:,8], theseRunParams)
+    #NB, trial indexing starts at zero
+    theseData=Session(sessionName,matStructData[:,1]-1,matStructData[:,2],matStructData[:,3],
+                                  matStructData[:,4],matStructData[:,5],matStructData[:,6],
+                                  matStructData[:,7],matStructData[:,8], theseRunParams)
                              
     return theseData
 
@@ -211,7 +209,7 @@ def makeNewStudyFromFileNamelist(studyName, fileNameList, studyArmDict):
             theStudy.addNewPpt(pptNum, studyArmDict[pptNum],aSession)
 
 
-return theStudy
+    return theStudy
 
 
 ##
@@ -239,7 +237,7 @@ def makeNewStudyFromDirectory(studyName, fileNameDir, studyArmDict):
             theStudy.addNewPpt(pptNum, studyArmDict[pptNum],aSession)
 
 
-return theStudy
+    return theStudy
 
 
 ##
@@ -320,8 +318,8 @@ def findProbabilityAndPredictionError(thisSession, alpha, beta, rewardWeight, tr
     error=np.zeros(len(trials))
 
 
-for i, t in enumerate(trials):
-    pA = np.exp((qA/beta))/(np.exp((qA/beta))+np.exp((qB/beta)))
+    for i, t in enumerate(trials):
+        pA = np.exp((qA/beta))/(np.exp((qA/beta))+np.exp((qB/beta)))
         pB = np.exp((qB/beta))/(np.exp((qA/beta))+np.exp((qB/beta)))
         
         feedback=thisSession.feedback[t] #did they see the gain look loss (+1) or did they see nothing (-1)
@@ -332,18 +330,18 @@ for i, t in enumerate(trials):
             error[i] = rewardWeight*feedback - qA #if saw what was expected 80% of the time rW*f=1
             qA = qA + alpha*error[i]
 
-    else:              #ppt choses nothing picture
-        proba[i] = np.log(pB)
+        else:              #ppt choses nothing picture
+            proba[i] = np.log(pB)
             error[i] = rewardWeight*feedback - qB #if saw what was expected 80% of the time rW*f=1,
             qB = qB + alpha*error[i]
 
-if plot == True:
-    plt.figure()
-        plt.title(trialType+" trials for ppt "+ppt+" session "+sessionName)
-        plt.plot(np.arange(len(proba)),proba,'ro', linestyle='--',label="probability")
-        plt.plot(np.arange(len(proba)),error,'bx', linestyle=':', label="reward p.e.")
-        plt.legend(loc='best')
-        plt.show()
+        if plot == True:
+            plt.figure()
+            plt.title(trialType+" trials for ppt "+ppt+" session "+sessionName)
+            plt.plot(np.arange(len(proba)),proba,'ro', linestyle='--',label="probability")
+            plt.plot(np.arange(len(proba)),error,'bx', linestyle=':', label="reward p.e.")
+            plt.legend(loc='best')
+            plt.show()
     
     return proba, error
 
@@ -395,8 +393,8 @@ def naiveParameterFitting(thisStudy, alphasRange, betasRange, rewardWeightsRange
                         plt.show()
 
 
-        bestRewWInd,bestAlphaInd,bestBetaInd = np.where(logLikelihoods == np.max(logLikelihoods))
-            thisSession.alphas[trialType] = alphas[bestAlphaInd]
+                bestRewWInd,bestAlphaInd,bestBetaInd = np.where(logLikelihoods == np.max(logLikelihoods))
+                thisSession.alphas[trialType] = alphas[bestAlphaInd]
                 thisSession.betas[trialType]= betas[bestBetaInd]
                 thisSession.rewardWeights[trialType] = rewardWeights[bestRewWInd]
 
